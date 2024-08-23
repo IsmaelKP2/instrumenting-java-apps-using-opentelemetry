@@ -14,6 +14,44 @@ Alternatively, you can also read the blog post: https://www.buildon.aws/posts/in
 * [Maven 3.8.6+](https://maven.apache.org/download.cgi)
 * [Docker](https://www.docker.com/get-started)
 
+## Running the microservice with Splunk Observability Cloud as observability backend.
+
+{WIP} This axemples send Traces and metrics to Splunk Observability Cloud. Then you can visualize trace in the APM module and the metrics in the Insfrastructure Monitoring moduleto visualize the the generated telemetry data.
+
+1. build the hello-app using the splunk opentelemetry java agent.
+
+```
+docker build -f Dockerfile.splunk  -t hello-app .
+```
+
+1. Start the containers using Docker Compose.
+
+```bash
+docker compose -f docker-compose-signalfx.yaml up -d
+```
+
+1. If you want to hit the application endpoint in a browser manually you can enter the below address in your URL:
+
+```
+http://localhost:8888/hello
+```
+
+[![Localhost endpoint](images/localhost.png)]
+
+
+2. Access the Observability CLoud UI: http://app.<realm>.signalfx.com
+
+3. Click the Hamburger menu and open the metric finder. 
+
+Enter `custom.metric` in the search bar you should see the metric appearing: 
+
+[![metric finder ](images/metric_finder.png)]
+
+you will be able to create a new chart by clicking on the metric name:
+
+[![metric chart ](images/metric_chart.png)]
+
+
 ## 🏢 Running the microservice with Grafana, Grafana Tempo, and Prometheus as observability backend.
 
 You can have the microservice sending telemetry data to a local observability backend. Traces will be sent to [Grafana Tempo](https://grafana.com/traces) and the metrics to [Prometheus](https://prometheus.io). Then you can use [Grafana](https://grafana.com/grafana) to visualize the the generated telemetry data.

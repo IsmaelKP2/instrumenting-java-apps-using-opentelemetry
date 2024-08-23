@@ -1,0 +1,47 @@
+
+services:
+  hello-app:
+    build: .
+    image: hello-app:latest
+    container_name: hello-app
+    hostname: hello-app
+    depends_on: [otelcollector]
+    ports:
+      - "8888:8888"
+    environment:
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcollector:4317
+      - OTEL_TRACES_SAMPLER=always_on
+      - OTEL_IMR_EXPORT_INTERVAL=5000
+      - OTEL_METRIC_EXPORT_INTERVAL=5000
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=hello-app,service.version=1.0,deployment.environment=production
+    healthcheck:
+      interval: 5s
+      retries: 10
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8888/hello
+
+  #OpenTelemetry Collector
+  otelcollector:
+    image:  quay.io/signalfx/splunk-otel-collector:latest-amd64
+    container_name: otelcollector-container
+    command: ["--config=/etc/otel-collector-config.yml", "--set=service.telemetry.logs.level=debug"]
+    environment:
+      - SPLUNK_ACCESS_TOKEN=${SPLUNK_ACCESS_TOKEN}
+      - REALM=${SPLUNK_REALM}
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
+    ports:
+    - 4317:4317
+    - 4318:4318
+    - 13133:13133
+    - 1888:1888
+    - 55679:55679
+    #pull_policy: always
+
+ 
+networks:
+  default:
+    name: mynetwork
+    external: false
+
